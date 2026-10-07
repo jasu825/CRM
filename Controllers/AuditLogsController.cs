@@ -158,17 +158,17 @@ public class AuditLogsController : Controller
                 "PasswordChange",
                 "User",
                 "USR-99",
-                oldValue: new { Password = "OldPlainTextP@ss123!", Username = "admin" },
+                oldValue: new { Password = "MOCK_OLD_TEST_PASSWORD_XYZ", Username = "admin" },
                 newValue: new 
                 { 
-                    Password = "NewSecretPassword456!", 
-                    PasswordHash = "AQAAAAEAACcQAAAAEHASH...", 
-                    Token = "eyJhbGciOiJIUzI1NiIsIn...", 
-                    SecurityStamp = "SEC-STAMP-XYZ",
-                    ApiKey = "API-KEY-123456",
+                    Password = "MOCK_NEW_TEST_PASSWORD_ABC", 
+                    PasswordHash = "MOCK_HASH_TEST_VALUE_123", 
+                    Token = "MOCK_TOKEN_TEST_VALUE_456", 
+                    SecurityStamp = "MOCK_STAMP_TEST_VALUE_789",
+                    ApiKey = "MOCK_API_KEY_TEST_VALUE",
                     Status = "Active" 
                 },
-                details: "Sensitive payload: password=SuperSecretPassword; token=TokenValue123;");
+                details: "Sensitive payload: password=MOCK_RAW_PASSWORD; token=MOCK_RAW_TOKEN;");
 
             var loggedEntry = await db.AuditLogs
                 .OrderByDescending(a => a.AuditLogId)
@@ -176,12 +176,12 @@ public class AuditLogsController : Controller
 
             if (loggedEntry != null)
             {
-                var leaksOldSecret = loggedEntry.OldValue?.Contains("OldPlainTextP@ss123!") ?? false;
-                var leaksNewSecret = loggedEntry.NewValue?.Contains("NewSecretPassword456!") ?? false;
-                var leaksHash = loggedEntry.NewValue?.Contains("AQAAAAEAACcQAAAAEHASH...") ?? false;
-                var leaksToken = loggedEntry.NewValue?.Contains("eyJhbGciOiJIUzI1NiIsIn...") ?? false;
-                var leaksStamp = loggedEntry.NewValue?.Contains("SEC-STAMP-XYZ") ?? false;
-                var leaksApiKey = loggedEntry.NewValue?.Contains("API-KEY-123456") ?? false;
+                var leaksOldSecret = loggedEntry.OldValue?.Contains("MOCK_OLD_TEST_PASSWORD_XYZ") ?? false;
+                var leaksNewSecret = loggedEntry.NewValue?.Contains("MOCK_NEW_TEST_PASSWORD_ABC") ?? false;
+                var leaksHash = loggedEntry.NewValue?.Contains("MOCK_HASH_TEST_VALUE_123") ?? false;
+                var leaksToken = loggedEntry.NewValue?.Contains("MOCK_TOKEN_TEST_VALUE_456") ?? false;
+                var leaksStamp = loggedEntry.NewValue?.Contains("MOCK_STAMP_TEST_VALUE_789") ?? false;
+                var leaksApiKey = loggedEntry.NewValue?.Contains("MOCK_API_KEY_TEST_VALUE") ?? false;
                 var hasRedactedToken = (loggedEntry.NewValue?.Contains("[REDACTED]") ?? false) && 
                                        (loggedEntry.OldValue?.Contains("[REDACTED]") ?? false);
 

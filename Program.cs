@@ -7,9 +7,13 @@ using AcxiomCRM.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configure EF Core to use SQL Server
+// Support optional local override files (ignored by git) in addition to User Secrets
+builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.local.json", optional: true, reloadOnChange: true);
+
+// 1. Configure EF Core to use SQL Server (resolves from User Secrets, appsettings, or Environment Variables)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found. Configure via User Secrets in development or Environment Variables in production.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));

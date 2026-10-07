@@ -1,0 +1,56 @@
+## Build and Compilation Results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio / IDE Files
+.vs/
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+## Sensitive Secrets and Local Development Configuration
+appsettings*.local.json
+appsettings.local.json
+appsettings.Production.json
+secrets.json
+*.secrets.json
+*.secrets.*
+.env
+.env.*
+*.env
+
+## Temporary and Cache Files
+*.tmp
+*.log
+*.bak
+*.cache
+*.swp
+*.pid
+
+## Database Files (Local DB / SQLite / Express)
+*.mdf
+*.ldf
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+## Operating System Files
+Thumbs.db
+desktop.ini
+.DS_Store
