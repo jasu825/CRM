@@ -1,0 +1,195 @@
+@model AcxiomCRM.ViewModels.Customers.CustomerListViewModel
+@{
+    ViewData["Title"] = "Customer Management";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="h3 fw-bold mb-0 text-dark">
+            <i class="bi bi-people-fill text-primary me-2"></i>Customers
+        </h2>
+        <p class="text-muted small mb-0">Manage customer records, search, filter, and track associated activities.</p>
+    </div>
+    <div>
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Add New Customer
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="Search by name, email, phone, company, or code..." />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="All" selected="@(string.IsNullOrEmpty(Model.StatusFilter) || Model.StatusFilter == "All")">All Statuses</option>
+                    <option value="Active" selected="@(Model.StatusFilter == "Active")">Active</option>
+                    <option value="Inactive" selected="@(Model.StatusFilter == "Inactive")">Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="pageSize" class="form-select">
+                    <option value="10" selected="@(Model.PageSize == 10)">10 per page</option>
+                    <option value="25" selected="@(Model.PageSize == 25)">25 per page</option>
+                    <option value="50" selected="@(Model.PageSize == 50)">50 per page</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">Filter</button>
+                @if (!string.IsNullOrEmpty(Model.Search) || (!string.IsNullOrEmpty(Model.StatusFilter) && Model.StatusFilter != "All"))
+                {
+                    <a asp-action="Index" class="btn btn-outline-secondary" title="Clear Filters">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Customer List Table -->
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        @if (!Model.Customers.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-person-x text-muted" style="font-size: 3rem;"></i>
+                <h5 class="text-muted mt-3">No customers found.</h5>
+                <p class="text-secondary small mb-3">Try adjusting your search criteria or register a new customer.</p>
+                <a asp-action="Create" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Add Customer
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-uppercase small text-muted">
+                        <tr>
+                            <th>Code</th>
+                            <th>Customer Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Company</th>
+                            <th>City / State</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.Customers)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary font-monospace">@c.CustomerCode</span>
+                                </td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@c.CustomerId" class="fw-bold text-decoration-none text-primary">
+                                        @c.CustomerName
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="mailto:@c.Email" class="text-secondary text-decoration-none">
+                                        <i class="bi bi-envelope me-1"></i>@c.Email
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="tel:@c.Phone" class="text-secondary text-decoration-none">
+                                        <i class="bi bi-telephone me-1"></i>@c.Phone
+                                    </a>
+                                </td>
+                                <td>@(string.IsNullOrEmpty(c.CompanyName) ? "-" : c.CompanyName)</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(c.City) || !string.IsNullOrEmpty(c.State))
+                                    {
+                                        <span>@c.City@(string.IsNullOrEmpty(c.City) || string.IsNullOrEmpty(c.State) ? "" : ", ")@c.State</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (c.Status == "Active")
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">Inactive</span>
+                                    }
+                                </td>
+                                <td class="small text-muted">@c.CreatedDate.ToString("yyyy-MM-dd")</td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@c.CustomerId" class="btn btn-outline-secondary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@c.CustomerId" class="btn btn-outline-primary" title="Edit Customer">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@c.CustomerId" class="btn btn-outline-danger" title="Deactivate / Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div class="card-footer bg-white border-top d-flex flex-column flex-sm-row justify-content-between align-items-center py-3">
+                <div class="small text-muted mb-2 mb-sm-0">
+                    Showing <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> to 
+                    <strong>@(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalItems))</strong> of 
+                    <strong>@Model.TotalItems</strong> customers
+                </div>
+
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Customer list pagination">
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" 
+                                   asp-route-page="@(Model.PageNumber - 1)" 
+                                   asp-route-search="@Model.Search" 
+                                   asp-route-status="@Model.StatusFilter" 
+                                   asp-route-pageSize="@Model.PageSize">&laquo; Prev</a>
+                            </li>
+
+                            @for (var p = 1; p <= Model.TotalPages; p++)
+                            {
+                                <li class="page-item @(p == Model.PageNumber ? "active" : "")">
+                                    <a class="page-link" asp-action="Index" 
+                                       asp-route-page="@p" 
+                                       asp-route-search="@Model.Search" 
+                                       asp-route-status="@Model.StatusFilter" 
+                                       asp-route-pageSize="@Model.PageSize">@p</a>
+                                </li>
+                            }
+
+                            <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" 
+                                   asp-route-page="@(Model.PageNumber + 1)" 
+                                   asp-route-search="@Model.Search" 
+                                   asp-route-status="@Model.StatusFilter" 
+                                   asp-route-pageSize="@Model.PageSize">Next &raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            </div>
+        }
+    </div>
+</div>

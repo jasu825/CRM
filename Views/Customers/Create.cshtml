@@ -1,0 +1,129 @@
+@model AcxiomCRM.ViewModels.Customers.CustomerCreateEditViewModel
+@{
+    ViewData["Title"] = "New Customer";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+                <h2 class="h3 fw-bold text-dark mb-0">
+                    <i class="bi bi-person-plus-fill text-primary me-2"></i>Create Customer
+                </h2>
+                <p class="text-muted small mb-0">Register a new customer profile into the CRM database.</p>
+            </div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to List
+            </a>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post" id="createCustomerForm" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <!-- Model-Level Validation Summary -->
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm mb-4" role="alert"></div>
+
+                    <div class="row g-4">
+                        <!-- Left Column: Primary Contact Details -->
+                        <div class="col-md-6 border-end-md">
+                            <h5 class="fw-semibold text-primary mb-3">
+                                <i class="bi bi-person-badge me-2"></i>Primary Contact Details
+                            </h5>
+
+                            <div class="mb-3">
+                                <label asp-for="CustomerName" class="form-label fw-semibold">Customer Name <span class="text-danger">*</span></label>
+                                <input asp-for="CustomerName" class="form-control" placeholder="e.g. John Doe / Acme Corp" autofocus />
+                                <span asp-validation-for="CustomerName" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input asp-for="Email" class="form-control" placeholder="john.doe@example.com" type="email" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                                <div class="form-text small">Must be unique across all customer records.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Phone" class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                    <input asp-for="Phone" class="form-control" placeholder="10-digit mobile number, e.g. 9876543210" maxlength="10" />
+                                </div>
+                                <span asp-validation-for="Phone" class="text-danger small"></span>
+                                <div class="form-text small">Must be a valid unique 10-digit phone number.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="CompanyName" class="form-label fw-semibold">Company / Organization</label>
+                                <input asp-for="CompanyName" class="form-control" placeholder="Optional company name" />
+                                <span asp-validation-for="CompanyName" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Location & Status -->
+                        <div class="col-md-6">
+                            <h5 class="fw-semibold text-primary mb-3">
+                                <i class="bi bi-geo-alt me-2"></i>Location & Account Status
+                            </h5>
+
+                            <div class="mb-3">
+                                <label asp-for="Address" class="form-label fw-semibold">Street Address</label>
+                                <input asp-for="Address" class="form-control" placeholder="Suite, Street address" />
+                                <span asp-validation-for="Address" class="text-danger small"></span>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-sm-6">
+                                    <label asp-for="City" class="form-label fw-semibold">City</label>
+                                    <input asp-for="City" class="form-control" placeholder="City" />
+                                    <span asp-validation-for="City" class="text-danger small"></span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label asp-for="State" class="form-label fw-semibold">State / Province</label>
+                                    <input asp-for="State" class="form-control" placeholder="State" />
+                                    <span asp-validation-for="State" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="Status" class="form-label fw-semibold">Account Status <span class="text-danger">*</span></label>
+                                <select asp-for="Status" class="form-select">
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                                <span asp-validation-for="Status" class="text-danger small"></span>
+                            </div>
+
+                            <div class="card bg-light border-0 p-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-info-circle text-primary fs-4 me-3"></i>
+                                    <div class="small text-muted">
+                                        A unique sequential <strong>Customer Code</strong> (e.g. CUST-1001) will be assigned automatically upon submission.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                            <i class="bi bi-check-lg me-1"></i> Save Customer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,50 @@
+@model AcxiomCRM.Models.Lead
+@{
+    ViewData["Title"] = $"Delete Lead: {Model.LeadName}";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white py-3">
+                <h4 class="h5 fw-bold mb-0">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Delete Lead
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-warning mb-4">
+                    <strong>Notice:</strong> You are about to remove lead <strong>@Model.LeadName</strong> (<span class="font-monospace">@Model.LeadCode</span>).
+                    If this lead has historical transactions, it will be marked as <strong>Lost</strong> instead of being permanently removed to preserve reporting history.
+                </div>
+
+                <dl class="row mb-4">
+                    <dt class="col-sm-4 text-muted">Lead Code</dt>
+                    <dd class="col-sm-8 font-monospace fw-bold">@Model.LeadCode</dd>
+
+                    <dt class="col-sm-4 text-muted">Lead Name</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.LeadName</dd>
+
+                    <dt class="col-sm-4 text-muted">Email Address</dt>
+                    <dd class="col-sm-8">@Model.Email</dd>
+
+                    <dt class="col-sm-4 text-muted">Phone Number</dt>
+                    <dd class="col-sm-8">@Model.Phone</dd>
+
+                    <dt class="col-sm-4 text-muted">Current Status</dt>
+                    <dd class="col-sm-8"><span class="badge bg-secondary">@Model.Status</span></dd>
+                </dl>
+
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+
+                    <form asp-action="Delete" asp-route-id="@Model.LeadId" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger px-4 shadow-sm">
+                            <i class="bi bi-trash-fill me-1"></i> Confirm Delete / Mark Lost
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

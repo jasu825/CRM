@@ -1,0 +1,350 @@
+@model AcxiomCRM.ViewModels.Leads.LeadDetailsViewModel
+@{
+    ViewData["Title"] = $"{Model.Lead.LeadName} - Details";
+}
+
+<!-- Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-secondary font-monospace fs-6">@Model.Lead.LeadCode</span>
+            <h2 class="h3 fw-bold text-dark mb-0">@Model.Lead.LeadName</h2>
+            @switch (Model.Lead.Status)
+            {
+                case AcxiomCRM.Models.Enums.LeadStatus.New:
+                    <span class="badge bg-info text-dark px-2 py-1">New</span>
+                    break;
+                case AcxiomCRM.Models.Enums.LeadStatus.Contacted:
+                    <span class="badge bg-primary px-2 py-1">Contacted</span>
+                    break;
+                case AcxiomCRM.Models.Enums.LeadStatus.Qualified:
+                    <span class="badge bg-success px-2 py-1">Qualified</span>
+                    break;
+                case AcxiomCRM.Models.Enums.LeadStatus.Unqualified:
+                    <span class="badge bg-warning text-dark px-2 py-1">Unqualified</span>
+                    break;
+                case AcxiomCRM.Models.Enums.LeadStatus.Converted:
+                    <span class="badge bg-success-subtle text-success border border-success px-2 py-1">Converted</span>
+                    break;
+                case AcxiomCRM.Models.Enums.LeadStatus.Lost:
+                    <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1">Lost</span>
+                    break;
+            }
+            <span class="badge bg-light text-dark border">@Model.Lead.Priority Priority</span>
+        </div>
+        <p class="text-muted small mb-0">
+            Captured on @Model.Lead.CreatedDate.ToString("MMMM dd, yyyy")
+            @if (Model.Lead.AssignedUser != null)
+            {
+                <span>&bull; Assigned to: <strong>@Model.Lead.AssignedUser.FullName</strong></span>
+            }
+            else
+            {
+                <span>&bull; <span class="text-warning">Unassigned</span></span>
+            }
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        @if (Model.Lead.Status != AcxiomCRM.Models.Enums.LeadStatus.Converted)
+        {
+            <a asp-action="Convert" asp-route-id="@Model.Lead.LeadId" class="btn btn-success shadow-sm">
+                <i class="bi bi-arrow-repeat me-1"></i> Convert Lead
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.Lead.LeadId" class="btn btn-primary shadow-sm">
+                <i class="bi bi-pencil me-1"></i> Edit
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Lead.LeadId" class="btn btn-outline-danger">
+                <i class="bi bi-trash me-1"></i> Delete
+            </a>
+        }
+        else if (Model.ConvertedCustomer != null)
+        {
+            <a asp-controller="Customers" asp-action="Details" asp-route-id="@Model.ConvertedCustomer.CustomerId" class="btn btn-info text-white shadow-sm">
+                <i class="bi bi-person-check me-1"></i> View Converted Customer
+            </a>
+        }
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Lead Information -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="card-title fw-bold mb-0 text-primary">
+                    <i class="bi bi-person-vcard me-2"></i>Lead Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-5 text-muted small text-uppercase">Email</dt>
+                    <dd class="col-7">
+                        <a href="mailto:@Model.Lead.Email" class="text-decoration-none">
+                            <i class="bi bi-envelope me-1"></i>@Model.Lead.Email
+                        </a>
+                    </dd>
+
+                    <dt class="col-5 text-muted small text-uppercase">Phone</dt>
+                    <dd class="col-7">
+                        <a href="tel:@Model.Lead.Phone" class="text-decoration-none">
+                            <i class="bi bi-telephone me-1"></i>@Model.Lead.Phone
+                        </a>
+                    </dd>
+
+                    <dt class="col-5 text-muted small text-uppercase">Company</dt>
+                    <dd class="col-7">@(string.IsNullOrEmpty(Model.Lead.CompanyName) ? "Individual" : Model.Lead.CompanyName)</dd>
+
+                    <dt class="col-5 text-muted small text-uppercase">Source</dt>
+                    <dd class="col-7"><span class="badge bg-light text-dark border">@Model.Lead.Source</span></dd>
+
+                    <dt class="col-5 text-muted small text-uppercase">Est. Value</dt>
+                    <dd class="col-7 fw-bold text-success fs-6">@Model.Lead.ExpectedValue.ToString("C")</dd>
+
+                    <dt class="col-5 text-muted small text-uppercase">Assigned To</dt>
+                    <dd class="col-7">@(Model.Lead.AssignedUser != null ? Model.Lead.AssignedUser.FullName : "Unassigned")</dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Quick Status Update Card -->
+        @if (Model.Lead.Status != AcxiomCRM.Models.Enums.LeadStatus.Converted)
+        {
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="card-title fw-bold mb-0 text-dark">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Update Qualification Stage
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (Model.Lead.Status != AcxiomCRM.Models.Enums.LeadStatus.Contacted)
+                        {
+                            <form asp-action="ChangeStatus" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Lead.LeadId" />
+                                <input type="hidden" name="newStatus" value="Contacted" />
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Mark Contacted</button>
+                            </form>
+                        }
+                        @if (Model.Lead.Status != AcxiomCRM.Models.Enums.LeadStatus.Qualified)
+                        {
+                            <form asp-action="ChangeStatus" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Lead.LeadId" />
+                                <input type="hidden" name="newStatus" value="Qualified" />
+                                <button type="submit" class="btn btn-sm btn-outline-success">Mark Qualified</button>
+                            </form>
+                        }
+                        @if (Model.Lead.Status != AcxiomCRM.Models.Enums.LeadStatus.Unqualified)
+                        {
+                            <form asp-action="ChangeStatus" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Lead.LeadId" />
+                                <input type="hidden" name="newStatus" value="Unqualified" />
+                                <button type="submit" class="btn btn-sm btn-outline-warning text-dark">Mark Unqualified</button>
+                            </form>
+                        }
+                        @if (Model.Lead.Status != AcxiomCRM.Models.Enums.LeadStatus.Lost)
+                        {
+                            <form asp-action="ChangeStatus" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Lead.LeadId" />
+                                <input type="hidden" name="newStatus" value="Lost" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Mark Lost</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Right Column: Associated Pipeline & History -->
+    <div class="col-lg-8">
+        <!-- Converted Customer Banner -->
+        @if (Model.ConvertedCustomer != null)
+        {
+            <div class="card border-success shadow-sm mb-4">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-success mb-1">Converted Customer Record</span>
+                        <h5 class="fw-bold mb-0">@Model.ConvertedCustomer.CustomerName (@Model.ConvertedCustomer.CustomerCode)</h5>
+                        <div class="small text-muted">@Model.ConvertedCustomer.Email &bull; @Model.ConvertedCustomer.Phone</div>
+                    </div>
+                    <a asp-controller="Customers" asp-action="Details" asp-route-id="@Model.ConvertedCustomer.CustomerId" class="btn btn-outline-success">
+                        View Customer Profile <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        }
+
+        <!-- Associated Opportunities -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+                <h5 class="card-title fw-bold mb-0 text-primary">
+                    <i class="bi bi-briefcase me-2"></i>Generated Opportunities
+                </h5>
+                <span class="badge bg-primary rounded-pill">@Model.Opportunities.Count()</span>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.Opportunities.Any())
+                {
+                    <div class="p-4 text-center text-muted small">
+                        No opportunities generated from this lead yet.
+                        @if (Model.Lead.Status != AcxiomCRM.Models.Enums.LeadStatus.Converted)
+                        {
+                            <div class="mt-2">
+                                <a asp-action="Convert" asp-route-id="@Model.Lead.LeadId" class="btn btn-sm btn-outline-success">
+                                    Convert to Create Opportunity
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small text-muted text-uppercase">
+                                <tr>
+                                    <th>Opportunity</th>
+                                    <th>Stage</th>
+                                    <th>Amount</th>
+                                    <th>Close Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var o in Model.Opportunities)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@o.OpportunityName</td>
+                                        <td><span class="badge bg-info-subtle text-info border">@o.Stage</span></td>
+                                        <td class="fw-bold text-success">@o.Amount.ToString("C")</td>
+                                        <td class="small text-muted">@o.ExpectedCloseDate.ToString("yyyy-MM-dd")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Follow-Ups Card -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+                <h5 class="card-title fw-bold mb-0 text-success">
+                    <i class="bi bi-calendar-check me-2"></i>Follow-Up History
+                </h5>
+                <span class="badge bg-success rounded-pill">@Model.FollowUps.Count()</span>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.FollowUps.Any())
+                {
+                    <div class="p-4 text-center text-muted small">No scheduled follow-up activities recorded for this lead.</div>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var f in Model.FollowUps)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <div class="fw-semibold">@f.Subject</div>
+                                    <div class="small text-muted">
+                                        <i class="bi bi-clock me-1"></i>@f.FollowUpDate.ToString("yyyy-MM-dd HH:mm") &bull; Type: @f.FollowUpType
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(f.Remarks))
+                                    {
+                                        <div class="small text-secondary mt-1">@f.Remarks</div>
+                                    }
+                                </div>
+                                <span class="badge bg-secondary">@f.Status</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <!-- Activities Section -->
+        <div class="card shadow-sm border-0 mb-4 mt-4">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+                <h5 class="card-title fw-bold mb-0 text-info">
+                    <i class="bi bi-clock-history me-2"></i>Activities & Interactions
+                </h5>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-info rounded-pill">@Model.Activities.Count()</span>
+                    <a asp-controller="Activities" asp-action="Create" asp-route-leadId="@Model.Lead.LeadId" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-plus-circle me-1"></i> Log Activity
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.Activities.Any())
+                {
+                    <div class="p-4 text-center text-muted small">
+                        No activity records (calls, meetings, emails) logged for this lead yet.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small text-muted text-uppercase">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Subject</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var a in Model.Activities)
+                                {
+                                    <tr>
+                                        <td>
+                                            @switch (a.ActivityType)
+                                            {
+                                                case AcxiomCRM.Models.Enums.ActivityType.Call:
+                                                    <span class="badge bg-primary-subtle text-primary border"><i class="bi bi-telephone-fill me-1"></i>Call</span>
+                                                    break;
+                                                case AcxiomCRM.Models.Enums.ActivityType.Meeting:
+                                                    <span class="badge bg-success-subtle text-success border"><i class="bi bi-people-fill me-1"></i>Meeting</span>
+                                                    break;
+                                                case AcxiomCRM.Models.Enums.ActivityType.Email:
+                                                    <span class="badge bg-info-subtle text-info border"><i class="bi bi-envelope-fill me-1"></i>Email</span>
+                                                    break;
+                                                case AcxiomCRM.Models.Enums.ActivityType.Task:
+                                                    <span class="badge bg-warning-subtle text-warning-emphasis border"><i class="bi bi-check2-square me-1"></i>Task</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td class="fw-semibold">
+                                            <a asp-controller="Activities" asp-action="Details" asp-route-id="@a.ActivityId" class="text-dark text-decoration-none">
+                                                @a.Subject
+                                            </a>
+                                        </td>
+                                        <td class="small text-muted">@a.ActivityDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td>
+                                            <span class="badge @(a.Status == "Completed" ? "bg-success" : "bg-secondary")">@a.Status</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a asp-controller="Activities" asp-action="Details" asp-route-id="@a.ActivityId" class="btn btn-sm btn-outline-secondary py-0 px-2" title="View Activity">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
